@@ -3,6 +3,8 @@ import multer from 'multer';
 import WebTorrent from 'webtorrent';
 import fs from 'fs';
 import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import archiver from 'archiver';
 
 const app = express();
 const port = 3000;
@@ -38,6 +40,9 @@ app.post('/download', upload.single('torrent'), (req, res) => {
   }
 
   const filePath = req.file.path;
+  const uniqueId = uuidv4();
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-'); // Format de date pour éviter les problèmes de nom de fichier
+  const zipFileName = `download-${uniqueId}-${timestamp}.zip`;
 
   // Ajouter le torrent
   client.add(filePath, { path: downloadDir }, (torrent) => {
@@ -45,34 +50,48 @@ app.post('/download', upload.single('torrent'), (req, res) => {
 
     torrent.on('done', () => {
       console.log(`Téléchargement terminé : ${torrent.name}`);
-    });
 
-    torrent.files.forEach((file) => {
-      const filePath = path.join(downloadDir, file.name);
-      const writeStream = fs.createWriteStream(filePath);
+      // Créer un fichier ZIP
+      const output = fs.createWriteStream(zipFileName);
+      const archive = archiver('zip', { zlib: { level: 9 } });
 
-      file.createReadStream().pipe(writeStream);
-
-      writeStream.on('finish', () => {
-        console.log(`Fichier téléchargé : ${file.name}`);
+      output.on('close', () => {
+        console.log(`Fichier ZIP créé : ${zipFileName}`);
+        // Envoyer le fichier ZIP en réponse
+        res.download(zipFileName, (err) => {
+          if (err) {
+            console.error(`Erreur lors de l'envoi du fichier ZIP : ${err.message}`);
+          }
+          // Nettoyer les fichiers temporaires après l'envoi
+          fs.unlink(filePath, (unlinkErr) => {
+            if (unlinkErr) console.error(`Erreur lors de la suppression du fichier torrent : ${unlinkErr.message}`);
+          });
+          fs.unlink(zipFileName, (unlinkErr) => {
+            if (unlinkErr) console.error(`Erreur lors de la suppression du fichier ZIP : ${unlinkErr.message}`);
+          });
+        });
       });
 
-      writeStream.on('error', (err) => {
-        console.error(`Erreur lors de l'écriture du fichier : ${err.message}`);
+      output.on('error', (err) => {
+        console.error(`Erreur lors de la création du fichier ZIP : ${err.message}`);
+        res.status(500).json({ error: `Erreur lors de la création du fichier ZIP : ${err.message}` });
       });
+
+      archive.pipe(output);
+
+      // Ajouter les fichiers téléchargés au ZIP
+      torrent.files.forEach((file) => {
+        const fileStream = file.createReadStream();
+        archive.append(fileStream, { name: file.name });
+      });
+
+      archive.finalize();
     });
 
-    // Supprimez le fichier torrent après l'ajout pour éviter l'encombrement
-    fs.unlink(filePath, (err) => {
-      if (err) console.error(`Erreur lors de la suppression du fichier torrent : ${err.message}`);
+    client.on('error', (err) => {
+      console.error(`Erreur : ${err.message}`);
+      res.status(500).json({ error: `Erreur de téléchargement : ${err.message}` });
     });
-
-    res.json({ message: `Téléchargement en cours pour : ${torrent.name}` });
-  });
-
-  client.on('error', (err) => {
-    console.error(`Erreur : ${err.message}`);
-    res.status(500).json({ error: `Erreur de téléchargement : ${err.message}` });
   });
 });
 
