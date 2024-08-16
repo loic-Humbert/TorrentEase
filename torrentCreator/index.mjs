@@ -5,9 +5,26 @@ import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import archiver from 'archiver';
+import cors from 'cors';
+import http from 'http';
+import { Server } from 'socket.io';
 
 const app = express();
 const port = 3000;
+
+// Configuration de CORS pour autoriser toutes les origines
+app.use(cors());
+
+// Création du serveur HTTP et initialisation de socket.io avec les options CORS
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:4200", // Autoriser les requêtes depuis cette origine
+    methods: ["GET", "POST"], // Méthodes HTTP autorisées
+    allowedHeaders: ["my-custom-header"], // En-têtes personnalisés autorisés
+    credentials: true // Autoriser l'envoi de cookies
+  }
+});
 
 // Configuration de multer pour stocker les fichiers uploadés
 const storage = multer.diskStorage({
@@ -47,6 +64,12 @@ app.post('/download', upload.single('torrent'), (req, res) => {
   // Ajouter le torrent
   client.add(filePath, { path: downloadDir }, (torrent) => {
     console.log(`Téléchargement de : ${torrent.name}`);
+
+    // Envoyer les mises à jour de progression au client via socket.io
+    torrent.on('download', (bytes) => {
+      const progress = (torrent.progress * 100).toFixed(2);
+      io.emit('progress', { progress, name: torrent.name });
+    });
 
     torrent.on('done', () => {
       console.log(`Téléchargement terminé : ${torrent.name}`);
@@ -95,7 +118,7 @@ app.post('/download', upload.single('torrent'), (req, res) => {
   });
 });
 
-// Démarrez le serveur
-app.listen(port, () => {
+// Démarrez le serveur avec socket.io
+server.listen(port, () => {
   console.log(`Serveur démarré sur http://localhost:${port}`);
 });

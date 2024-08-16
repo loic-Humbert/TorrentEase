@@ -1,0 +1,49 @@
+<div class="flex flex-col min-h-screen">
+    <div class="flex justify-center border-b-2">
+        <img class="w-20" src="../../assets/logo.png" alt="logo">
+        <h1 class="my-auto font-bold text-4xl">Torrent Ease</h1>
+    </div>
+
+    <section class="bg-slate-100 flex-grow">
+        <h1 class="text-center font-bold text-5xl mt-10">Torrent Ease : Téléchargeur de fichiers torrent</h1>
+        <h1 class="text-center font-bold text-2xl mt-2">Téléchargez vos fichiers torrent gratuitement et sans logiciel
+            tiers</h1>
+
+
+        <div class="flex justify-center mt-10">
+            <label class="w-2/3 rounded-full border-red-600 border-2 focus:border-red-600 focus:ring-red-600 focus:outline-none cursor-pointer inline-block px-4 py-2">
+                Choisir un fichier
+                <input (change)="onFileSelected($event)" type="file" class="hidden">
+            </label>
+            
+            <button (click)="downloadTorrent()" type="button"
+                class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-full	 text-2xl px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 focus:outline-none dark:focus:ring-red-800">Télécharger</button>
+            </div>
+            <p class="text-center">fichier chargé : {{torrentName}}</p>
+
+        <div class="w-2/5 m-auto mt-32">
+            <h1 class="text-center font-bold text-5xl mt-10">Meilleur Téléchargeur de Torrents</h1>
+            <p class="mt-5">Notre plateforme de téléchargement de torrents offre une solution efficace et conviviale pour
+                accéder
+                facilement à vos contenus favoris. En tant que service de plus en plus reconnu, notre site permet aux
+                utilisateurs de télécharger des torrents en toute simplicité, garantissant une expérience fluide et
+                sécurisée pour profiter de leurs fichiers préférés hors ligne.
+
+                Avec une interface intuitive et des fonctionnalités avancées, notre plateforme est rapidement devenue le
+                choix de prédilection pour ceux qui cherchent à télécharger des fichiers de manière rapide et fiable.
+                Compatible avec une large gamme d'appareils et de systèmes d'exploitation, notre service répond aux
+                besoins
+                variés des utilisateurs, qu'ils soient sur un ordinateur de bureau, un ordinateur portable, un
+                smartphone ou
+                une tablette.
+
+                Notre engagement envers la satisfaction des utilisateurs se traduit par des mises à jour régulières
+                visant à
+                améliorer la performance, la sécurité et la fiabilité de notre service. Grâce à des vitesses de
+                téléchargement élevées et à une large sélection de torrents de haute qualité, vous pouvez profiter de
+                vos
+                fichiers sans interruption ni compromis sur la qualité. De plus, notre plateforme intègre des mesures de
+                sécurité robustes pour garantir la protection de vos données et une navigation sereine.</p>
+        </div>
+    </section>
+</div>
