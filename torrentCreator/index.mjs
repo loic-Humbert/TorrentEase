@@ -10,7 +10,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 
 const app = express();
-const port = 3000;
+const port = 3001;
 
 // Configuration de CORS pour autoriser toutes les origines
 app.use(cors());
@@ -42,7 +42,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Créez une instance du client WebTorrent
-const client = new WebTorrent();
 
 // Créez le dossier pour les fichiers téléchargés s'il n'existe pas
 const downloadDir = 'downloads/';
@@ -52,6 +51,8 @@ if (!fs.existsSync(downloadDir)) {
 
 // Route pour télécharger un torrent via fichier uploadé
 app.post('/download', upload.single('torrent'), (req, res) => {
+  const client = new WebTorrent();
+
   if (!req.file) {
     return res.status(400).json({ error: 'Aucun fichier torrent reçu' });
   }
@@ -61,61 +62,79 @@ app.post('/download', upload.single('torrent'), (req, res) => {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-'); // Format de date pour éviter les problèmes de nom de fichier
   const zipFileName = `download-${uniqueId}-${timestamp}.zip`;
 
-  // Ajouter le torrent
-  client.add(filePath, { path: downloadDir }, (torrent) => {
-    console.log(`Téléchargement de : ${torrent.name}`);
+  // Trouver et supprimer le torrent existant avec le même hash, si présent
+  const existingTorrent = client.torrents.find(torrent => torrent.infoHash === filePath);
 
-    // Envoyer les mises à jour de progression au client via socket.io
-    torrent.on('download', (bytes) => {
-      const progress = (torrent.progress * 100).toFixed(2);
-      io.emit('progress', { progress, name: torrent.name });
+  if (existingTorrent) {
+    console.log(`Torrent déjà présent, suppression de : ${existingTorrent.name}`);
+    existingTorrent.destroy(() => {
+      console.log(`Torrent supprimé, ajout du nouveau torrent`);
+      addTorrent();
     });
+  } else {
+    addTorrent();
+  }
 
-    torrent.on('done', () => {
-      console.log(`Téléchargement terminé : ${torrent.name}`);
+  function addTorrent() {
+    client.add(filePath, { path: downloadDir }, (torrent) => {
+      console.log(`Téléchargement de : ${torrent.name}`);
 
-      // Créer un fichier ZIP
-      const output = fs.createWriteStream(zipFileName);
-      const archive = archiver('zip', { zlib: { level: 9 } });
+      // Envoyer les mises à jour de progression au client via socket.io
+      torrent.on('download', (bytes) => {
+        const progress = (torrent.progress * 100).toFixed(2);
+        io.emit('progress', { progress, name: torrent.name });
+      });
 
-      output.on('close', () => {
-        console.log(`Fichier ZIP créé : ${zipFileName}`);
-        // Envoyer le fichier ZIP en réponse
-        res.download(zipFileName, (err) => {
-          if (err) {
-            console.error(`Erreur lors de l'envoi du fichier ZIP : ${err.message}`);
-          }
-          // Nettoyer les fichiers temporaires après l'envoi
-          fs.unlink(filePath, (unlinkErr) => {
-            if (unlinkErr) console.error(`Erreur lors de la suppression du fichier torrent : ${unlinkErr.message}`);
-          });
-          fs.unlink(zipFileName, (unlinkErr) => {
-            if (unlinkErr) console.error(`Erreur lors de la suppression du fichier ZIP : ${unlinkErr.message}`);
+      torrent.on('done', () => {
+        console.log(`Téléchargement terminé : ${torrent.name}`);
+
+        // Créer un fichier ZIP
+        const output = fs.createWriteStream(zipFileName);
+        const archive = archiver('zip', { zlib: { level: 9 } });
+
+        output.on('close', () => {
+          console.log(`Fichier ZIP créé : ${zipFileName}`);
+          // Envoyer le fichier ZIP en réponse
+          res.download(zipFileName, (err) => {
+            if (err) {
+              console.error(`Erreur lors de l'envoi du fichier ZIP : ${err.message}`);
+            }
+            // Nettoyer les fichiers temporaires après l'envoi
+            fs.unlink(filePath, (unlinkErr) => {
+              if (unlinkErr) console.error(`Erreur lors de la suppression du fichier torrent : ${unlinkErr.message}`);
+            });
+            fs.unlink(zipFileName, (unlinkErr) => {
+              if (unlinkErr) console.error(`Erreur lors de la suppression du fichier ZIP : ${unlinkErr.message}`);
+            });
           });
         });
+
+        output.on('error', (err) => {
+          console.error(`Erreur lors de la création du fichier ZIP : ${err.message}`);
+          if (!res.headersSent) {
+            res.status(500).json({ error: `Erreur lors de la création du fichier ZIP : ${err.message}` });
+          }
+        });
+
+        archive.pipe(output);
+
+        // Ajouter les fichiers téléchargés au ZIP
+        torrent.files.forEach((file) => {
+          const fileStream = file.createReadStream();
+          archive.append(fileStream, { name: file.name });
+        });
+
+        archive.finalize();
       });
 
-      output.on('error', (err) => {
-        console.error(`Erreur lors de la création du fichier ZIP : ${err.message}`);
-        res.status(500).json({ error: `Erreur lors de la création du fichier ZIP : ${err.message}` });
+      torrent.on('error', (err) => {
+        console.error(`Erreur lors du téléchargement du torrent : ${err.message}`);
+        if (!res.headersSent) {
+          res.status(500).json({ error: `Erreur de téléchargement : ${err.message}` });
+        }
       });
-
-      archive.pipe(output);
-
-      // Ajouter les fichiers téléchargés au ZIP
-      torrent.files.forEach((file) => {
-        const fileStream = file.createReadStream();
-        archive.append(fileStream, { name: file.name });
-      });
-
-      archive.finalize();
     });
-
-    client.on('error', (err) => {
-      console.error(`Erreur : ${err.message}`);
-      res.status(500).json({ error: `Erreur de téléchargement : ${err.message}` });
-    });
-  });
+  }
 });
 
 // Démarrez le serveur avec socket.io
