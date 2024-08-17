@@ -33,4 +33,4 @@ jobs:
         cd ../
         ls
         scp -r TorrentEase/.dockerignore root@85.31.239.153:/home/TorrentEase
-        ssh root@85.31.239.153 "cd /home/TorrentEase && ls && cd front && npm run build && cd .. && cd torrentCreator && ls"
+        ssh root@85.31.239.153 "cd /home/TorrentEase && ls && cd front && npm run build && sudo systemctl restart nginx &&  cd .. && cd torrentCreator && ls && screen -dmS mynodeapp node index.mjs"
