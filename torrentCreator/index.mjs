@@ -59,19 +59,6 @@ app.post('/download', upload.single('torrent'), (req, res) => {
     return res.status(400).json({ error: 'Aucun fichier torrent reçu' });
   }
 
-  // Vérification du type MIME et de l'extension du fichier
-  const fileMimeType = req.file.mimetype;
-  const fileExtension = path.extname(req.file.originalname).toLowerCase();
-
-  if (fileMimeType !== 'application/x-bittorrent' || fileExtension !== '.torrent') {
-    // Supprimer le fichier non valide
-    fs.unlink(req.file.path, (err) => {
-      if (err) console.error(`Erreur lors de la suppression du fichier non valide : ${err.message}`);
-    });
-
-    return res.status(400).json({ error: 'Le fichier envoyé n\'est pas un fichier torrent valide' });
-  }
-
   const filePath = req.file.path;
   const uniqueId = uuidv4();
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-'); // Format de date pour éviter les problèmes de nom de fichier
