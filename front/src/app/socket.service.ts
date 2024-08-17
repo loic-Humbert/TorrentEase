@@ -10,7 +10,7 @@ export class SocketService {
 
   constructor() {
     // Connectez-vous au serveur Socket.io
-    this.socket = io('http://localhost:3001');
+    this.socket = io('http://85.31.239.153:3001');
   }
 
   // Méthode pour écouter la progression du téléchargement

@@ -8,9 +8,11 @@ import archiver from 'archiver';
 import cors from 'cors';
 import http from 'http';
 import { Server } from 'socket.io';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
-const port = 3001;
+const port =  process.env.PORT;
 
 // Configuration de CORS pour autoriser toutes les origines
 app.use(cors());
@@ -19,7 +21,7 @@ app.use(cors());
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:4200", // Autoriser les requêtes depuis cette origine
+    origin: "*", // Autoriser les requêtes depuis cette origine
     methods: ["GET", "POST"], // Méthodes HTTP autorisées
     allowedHeaders: ["my-custom-header"], // En-têtes personnalisés autorisés
     credentials: true // Autoriser l'envoi de cookies

@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class TorrentService {
 
-  private apiUrl = 'http://localhost:3000/download'; // Assurez-vous que l'URL est correcte
+  private apiUrl = 'http://85.31.239.153:3001/download'; // Assurez-vous que l'URL est correcte
 
   constructor(private http: HttpClient) { }
 
