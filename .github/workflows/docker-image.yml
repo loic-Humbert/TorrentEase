@@ -33,4 +33,4 @@ jobs:
         cd ../
         ls
         scp -r TorrentEase/* root@85.31.239.153:/home/TorrentEase
-        ssh root@85.31.239.153 "cd /home/TorrentEase && killall screen &&  ls && cd front && sudo rm -rf node_modules && npm i  && npm run build && sudo systemctl restart nginx &&  cd .. && cd torrentCreator && ls && sudo rm -rf node_modules &&  npm i && printf "PORT=3001" > .env &&  screen -dmS mynodeapp node index.mjs"
+        ssh root@85.31.239.153 "cd /home/TorrentEase && killall screen || true && ls && cd front && sudo rm -rf node_modules && npm i && npm run build && sudo systemctl restart nginx && cd .. && cd torrentCreator && ls && sudo rm -rf node_modules && npm i && printf 'PORT=3001' > .env && screen -dmS mynodeapp node index.mjs"
