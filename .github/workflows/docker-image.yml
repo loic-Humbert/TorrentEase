@@ -34,7 +34,7 @@ jobs:
         ssh root@85.31.239.153 "hostname"
         cd ../
         ls
-        scp -r TorrentEase/* root@85.31.239.153:/home/TorrentEase
-        ssh root@85.31.239.153 "cd /home/TorrentEase && ls && docker system prune && docker compose -f docker-compose-prod.yml up --build -d"
+        # scp -r TorrentEase/* root@85.31.239.153:/home/TorrentEase
+        ssh root@85.31.239.153 "cd /home/TorrentEase && ls && cd front && npm run build && cd .. && cd torrentCreator && ls
   
       
