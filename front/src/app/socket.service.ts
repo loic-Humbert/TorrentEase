@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { Observable } from 'rxjs';
+import { environment } from '../environments/environment'; 
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ export class SocketService {
 
   constructor() {
     // Connectez-vous au serveur Socket.io
-    this.socket = io('http://85.31.239.153:3001');
+    this.socket = io(environment.apiUrl);
   }
 
   // Méthode pour écouter la progression du téléchargement

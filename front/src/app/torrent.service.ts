@@ -1,13 +1,14 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../environments/environment';  // Importez les environnements
 
 @Injectable({
   providedIn: 'root'
 })
 export class TorrentService {
 
-  private apiUrl = 'http://85.31.239.153:3001/download'; // Assurez-vous que l'URL est correcte
+  private apiUrl = environment.apiUrl; // Assurez-vous que l'URL est correcte
 
   constructor(private http: HttpClient) { }
 
@@ -19,7 +20,7 @@ export class TorrentService {
       'enctype': 'multipart/form-data'
     });
   
-    return this.http.post(this.apiUrl, formData, {
+    return this.http.post(this.apiUrl + "/download", formData, {
       headers,
       responseType: 'blob'  // Spécifiez que vous attendez un Blob en réponse
     });
