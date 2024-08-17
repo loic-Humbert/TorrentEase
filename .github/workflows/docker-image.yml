@@ -1,0 +1,40 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Installer OpenSSH si nécessaire
+      run: |
+        if ! command -v ssh-agent >/dev/null; then
+          sudo apt-get update && sudo apt-get install -y openssh-client
+        else
+          echo "ssh-agent est déjà installé."
+        fi
+      
+    - name: Configure l'agent SSH
+      env:
+        SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
+      run: |
+        eval "$(ssh-agent -s)"
+        echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+        mkdir -p ~/.ssh
+        chmod 700 ~/.ssh
+        ssh-keyscan 85.31.239.153 >> ~/.ssh/known_hosts
+        chmod 644 ~/.ssh/known_hosts
+        ssh root@85.31.239.153 "hostname"
+        cd ../
+        ls
+        scp -r TorrentEase/* root@85.31.239.153:/home/TorrentEase
+        ssh root@85.31.239.153 "cd /home/TorrentEase && ls && docker system prune && docker compose -f docker-compose-prod.yml up --build -d"
+  
+      
