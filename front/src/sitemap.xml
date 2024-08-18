@@ -5,10 +5,15 @@
         <lastmod>2024-08-17</lastmod>
         <priority>1.00</priority>
     </url>
-    <!-- <url>
-        <loc>https://www.votre-domaine.com/guide-securite-torrents</loc>
-        <lastmod>2024-08-17</lastmod>
-        <priority>0.80</priority>
-    </url> -->
+    <url>
+        <loc>http://torrentdownloader.fr/blog/TelechargerTorrent</loc>
+        <lastmod>2024-08-18</lastmod>
+        <priority>0.50</priority>
+    </url>
+    <url>
+        <loc>http://torrentdownloader.fr/blog/ComparatorUttorent</loc>
+        <lastmod>2024-08-18</lastmod>
+        <priority>0.50</priority>
+    </url>
     <!-- Ajoutez ici d'autres URLs importantes de votre site -->
 </urlset>
