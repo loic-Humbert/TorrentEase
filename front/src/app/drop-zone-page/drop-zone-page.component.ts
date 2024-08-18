@@ -1,15 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { TorrentService } from '../torrent.service';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { SocketService } from '../socket.service';
+import { QuestionReponseComponent } from "../question-reponse/question-reponse.component";
 
 
 @Component({
   selector: 'app-drop-zone-page',
   standalone: true,
-  imports: [HttpClientModule],
+  imports: [HttpClientModule, QuestionReponseComponent],
   templateUrl: './drop-zone-page.component.html',
-  styleUrl: './drop-zone-page.component.scss'
+  styleUrl: './drop-zone-page.component.scss',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]  // Ajouter cette ligne
 })
 export class DropZonePageComponent {
   currentFile: any
