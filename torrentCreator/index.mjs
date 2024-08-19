@@ -52,6 +52,7 @@ if (!fs.existsSync(downloadDir)) {
 }
 
 // Route pour télécharger un torrent via fichier uploadé
+// Route pour télécharger un torrent via fichier uploadé
 app.post('/download', upload.single('torrent'), (req, res) => {
   const client = new WebTorrent();
 
@@ -75,69 +76,79 @@ app.post('/download', upload.single('torrent'), (req, res) => {
     });
   } else {
     addTorrent();
+    
+
   }
 
   function addTorrent() {
-    client.add(filePath, { path: downloadDir }, (torrent) => {
-      console.log(`Téléchargement de : ${torrent.name}`);
+    try {
+      
+      
+      client.add(filePath, { path: downloadDir }, (torrent) => {
+        console.log(`Téléchargement de : ${torrent.name}`);
 
-      // Envoyer les mises à jour de progression au client via socket.io
-      torrent.on('download', (bytes) => {
-        const progress = (torrent.progress * 100).toFixed(2);
-        io.emit('progress', { progress, name: torrent.name });
-      });
+        // Envoyer les mises à jour de progression au client via socket.io
+        torrent.on('download', (bytes) => {
+          const progress = (torrent.progress * 100).toFixed(2);
+          io.emit('progress', { progress, name: torrent.name });
+        });
 
-      torrent.on('done', () => {
-        console.log(`Téléchargement terminé : ${torrent.name}`);
+        torrent.on('done', () => {
+          console.log(`Téléchargement terminé : ${torrent.name}`);
 
-        // Créer un fichier ZIP
-        const output = fs.createWriteStream(zipFileName);
-        const archive = archiver('zip', { zlib: { level: 9 } });
+          // Créer un fichier ZIP
+          const output = fs.createWriteStream(zipFileName);
+          const archive = archiver('zip', { zlib: { level: 9 } });
 
-        output.on('close', () => {
-          console.log(`Fichier ZIP créé : ${zipFileName}`);
-          // Envoyer le fichier ZIP en réponse
-          res.download(zipFileName, (err) => {
-            if (err) {
-              console.error(`Erreur lors de l'envoi du fichier ZIP : ${err.message}`);
-            }
-            // Nettoyer les fichiers temporaires après l'envoi
-            fs.unlink(filePath, (unlinkErr) => {
-              if (unlinkErr) console.error(`Erreur lors de la suppression du fichier torrent : ${unlinkErr.message}`);
-            });
-            fs.unlink(zipFileName, (unlinkErr) => {
-              if (unlinkErr) console.error(`Erreur lors de la suppression du fichier ZIP : ${unlinkErr.message}`);
+          output.on('close', () => {
+            console.log(`Fichier ZIP créé : ${zipFileName}`);
+            // Envoyer le fichier ZIP en réponse
+            res.download(zipFileName, (err) => {
+              if (err) {
+                console.error(`Erreur lors de l'envoi du fichier ZIP : ${err.message}`);
+              }
+              // Nettoyer les fichiers temporaires après l'envoi
+              fs.unlink(filePath, (unlinkErr) => {
+                if (unlinkErr) console.error(`Erreur lors de la suppression du fichier torrent : ${unlinkErr.message}`);
+              });
+              fs.unlink(zipFileName, (unlinkErr) => {
+                if (unlinkErr) console.error(`Erreur lors de la suppression du fichier ZIP : ${unlinkErr.message}`);
+              });
             });
           });
+
+          output.on('error', (err) => {
+            console.error(`Erreur lors de la création du fichier ZIP : ${err.message}`);
+            if (!res.headersSent) {
+              res.status(500).json({ error: `Erreur lors de la création du fichier ZIP : ${err.message}` });
+            }
+          });
+
+          archive.pipe(output);
+
+          // Ajouter les fichiers téléchargés au ZIP
+          torrent.files.forEach((file) => {
+            const fileStream = file.createReadStream();
+            archive.append(fileStream, { name: file.name });
+          });
+
+          archive.finalize();
         });
 
-        output.on('error', (err) => {
-          console.error(`Erreur lors de la création du fichier ZIP : ${err.message}`);
+        torrent.on('error', (err) => {
+          console.error(`Erreur lors du téléchargement du torrent : ${err.message}`);
           if (!res.headersSent) {
-            res.status(500).json({ error: `Erreur lors de la création du fichier ZIP : ${err.message}` });
+            res.status(500).json({ error: `Erreur de téléchargement : ${err.message}` });
           }
         });
-
-        archive.pipe(output);
-
-        // Ajouter les fichiers téléchargés au ZIP
-        torrent.files.forEach((file) => {
-          const fileStream = file.createReadStream();
-          archive.append(fileStream, { name: file.name });
-        });
-
-        archive.finalize();
       });
-
-      torrent.on('error', (err) => {
-        console.error(`Erreur lors du téléchargement du torrent : ${err.message}`);
-        if (!res.headersSent) {
-          res.status(500).json({ error: `Erreur de téléchargement : ${err.message}` });
-        }
-      });
-    });
+    } catch (err) {
+      console.error(`Erreur lors de l'ajout du torrent : ${err.message}`);
+      res.status(500).json({ error: `Impossible d'ajouter le torrent : ${err.message}` });
+    }
   }
 });
+
 
 // Démarrez le serveur avec socket.io
 server.listen(port, () => {

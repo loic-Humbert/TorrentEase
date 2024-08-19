@@ -26,7 +26,7 @@ export class DropZonePageComponent {
   ngOnInit(): void {
     // S'abonner aux mises à jour de progression
     this.socketService.onProgress().subscribe(data => {
-      this.progress = parseFloat(data.progress);
+      this.progress = parseInt(data.progress);
       this.torrentName = data.name;
       console.log(this.progress);
       
@@ -54,6 +54,15 @@ export class DropZonePageComponent {
     }
   }
 
+  transformExtension(filename: string): string {
+    if (filename.endsWith('.torrent')) {
+        return filename.replace('.torrent', '.zip');
+    } else {
+        return filename
+    }
+}
+
+
   downloadTorrent() {
     this.torrentService.uploadFile(this.currentFile).subscribe(
       (response: Blob) => {
@@ -62,7 +71,7 @@ export class DropZonePageComponent {
         // Créer un lien pour télécharger le fichier
         const a = document.createElement('a');
         a.href = url;
-        a.download = this.currentFile.name;  // Vous pouvez aussi utiliser un nom spécifique pour le fichier téléchargé
+        a.download = this.transformExtension(this.currentFile.name);  // Vous pouvez aussi utiliser un nom spécifique pour le fichier téléchargé
         document.body.appendChild(a);
         a.click();
         // Nettoyer
