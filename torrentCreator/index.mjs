@@ -19,7 +19,7 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 
 // Chargement des certificats SSL
-const privateKey = fs.readFileSync('certificate/key.pem', 'utf8') || null;
+const privateKey = fs.readFileSync('certificate/privkey.pem', 'utf8') || null;
 
 const certificate = fs.readFileSync('certificate/cert.pem', 'utf8') || null;
 const credentials = { key: privateKey, cert: certificate };
