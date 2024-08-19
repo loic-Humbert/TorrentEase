@@ -6,19 +6,26 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import archiver from 'archiver';
 import cors from 'cors';
-import http from 'http';
+import https from 'https';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 dotenv.config();
 
+// Création de l'application Express
 const app = express();
-const port =  process.env.PORT;
+const port = process.env.PORT || 3000;
 
 // Configuration de CORS pour autoriser toutes les origines
 app.use(cors());
 
-// Création du serveur HTTP et initialisation de socket.io avec les options CORS
-const server = http.createServer(app);
+// Chargement des certificats SSL
+const privateKey = fs.readFileSync('certificate/key.pem', 'utf8') || null;
+
+const certificate = fs.readFileSync('certificate/cert.pem', 'utf8') || null;
+const credentials = { key: privateKey, cert: certificate };
+
+// Création du serveur HTTPS et initialisation de socket.io avec les options CORS
+const server = https.createServer(credentials, app);
 const io = new Server(server, {
   cors: {
     origin: "*", // Autoriser les requêtes depuis cette origine
@@ -44,6 +51,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Créez une instance du client WebTorrent
+const client = new WebTorrent();
 
 // Créez le dossier pour les fichiers téléchargés s'il n'existe pas
 const downloadDir = 'downloads/';
@@ -52,10 +60,7 @@ if (!fs.existsSync(downloadDir)) {
 }
 
 // Route pour télécharger un torrent via fichier uploadé
-// Route pour télécharger un torrent via fichier uploadé
 app.post('/download', upload.single('torrent'), (req, res) => {
-  const client = new WebTorrent();
-
   if (!req.file) {
     return res.status(400).json({ error: 'Aucun fichier torrent reçu' });
   }
@@ -76,14 +81,10 @@ app.post('/download', upload.single('torrent'), (req, res) => {
     });
   } else {
     addTorrent();
-    
-
   }
 
   function addTorrent() {
     try {
-      
-      
       client.add(filePath, { path: downloadDir }, (torrent) => {
         console.log(`Téléchargement de : ${torrent.name}`);
 
@@ -149,8 +150,7 @@ app.post('/download', upload.single('torrent'), (req, res) => {
   }
 });
 
-
 // Démarrez le serveur avec socket.io
 server.listen(port, () => {
-  console.log(`Serveur démarré sur http://localhost:${port}`);
+  console.log(`Serveur démarré sur https://localhost:${port}`);
 });
