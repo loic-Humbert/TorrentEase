@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description"
-        content="Téléchargez des fichiers torrents rapidement et en toute sécurité avec Torrent Downloader, votre solution gratuite sans besoin de logiciel tiers.">
-    <title>Torrent Downloader - Téléchargeur de Fichiers Torrent Gratuit</title>
+        content="Download torrent files quickly and securely with Torrent Downloader, your free solution without the need for third-party software.">
+    <title>Torrent Downloader - Free Torrent File Downloader</title>
 </head>
 
 <script type="application/ld+json">
@@ -16,40 +16,40 @@
       "name": "Torrent Downloader",
       "operatingSystem": "Windows, MacOS, Linux",
       "applicationCategory": "Utility",
-      "description": "Téléchargez des fichiers torrents gratuitement et en toute sécurité.",
+      "description": "Download torrent files for free and securely.",
       "offers": {
         "@type": "Offer",
         "price": "0.00",
         "priceCurrency": "EUR"
       }
     }
-    </script>
+</script>
 
 <body>
     <div class="flex flex-col min-h-screen">
         <div class="flex justify-center border-b-2">
-            <img class="w-20" src="../../assets/logo.png" alt="Logo Torrent Downloader">
+            <img class="w-20" src="../../assets/logo.png" alt="Torrent Downloader Logo">
             <h1 class="my-auto font-bold text-4xl">Torrent Downloader</h1>
         </div>
 
         <section class="bg-slate-100 flex-grow">
-            <h2 class="text-center font-bold text-5xl mt-10">Torrent Downloader : Téléchargeur de fichiers torrent</h2>
-            <h2 class="text-center font-bold text-2xl mt-2">Téléchargez vos fichiers torrent gratuitement et sans
-                logiciel tiers</h2>
+            <h2 class="text-center font-bold text-5xl mt-10">Torrent Downloader: Torrent File Downloader</h2>
+            <h2 class="text-center font-bold text-2xl mt-2">Download your torrent files for free and without third-party
+                software</h2>
 
             <div class="flex justify-center mt-10">
                 <label
                     class="w-2/3 rounded-full border-red-600 border-2 focus:border-red-600 focus:ring-red-600 focus:outline-none cursor-pointer inline-block px-4 py-2">
-                    Choisir un fichier
+                    Choose a File
                     <input (change)="onFileSelected($event)" type="file" class="hidden">
                 </label>
 
                 <button (click)="downloadTorrent()" type="button"
                     class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-full text-2xl px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 focus:outline-none dark:focus:ring-red-800">
-                    Télécharger
+                    Download
                 </button>
             </div>
-            <p class="text-center">Fichier chargé : {{torrentName}}</p>
+            <p class="text-center">Loaded file: {{torrentName}}</p>
 
             <div ngif="progress != 0">
                 <div>
@@ -60,35 +60,25 @@
             </div>
 
             <div class="w-full sm:w-3/5 m-auto mt-32">
-                <h3 class="text-center font-bold text-5xl mt-10">Meilleur Téléchargeur de Torrents</h3>
+                <h3 class="text-center font-bold text-5xl mt-10">Best Torrent Downloader</h3>
                 <p class="mt-5">
-                    Notre plateforme de téléchargement de torrents offre une solution efficace et conviviale
-                    pour accéder facilement à vos contenus favoris. En tant que service de plus en plus reconnu, notre
-                    site permet
-                    aux utilisateurs de télécharger des torrents en toute simplicité, garantissant une expérience fluide
-                    et
-                    sécurisée pour profiter de leurs fichiers préférés hors ligne.
+                    Our torrent downloading platform offers an efficient and user-friendly solution for easily accessing
+                    your favorite content. As an increasingly recognized service, our site allows users to download
+                    torrents with ease, ensuring a smooth and secure experience to enjoy their favorite files offline.
                     <br><br>
-                    Avec une interface intuitive et des fonctionnalités avancées, notre plateforme est rapidement
-                    devenue le choix de prédilection pour ceux qui cherchent à télécharger des fichiers de manière
-                    rapide et
-                    fiable. Compatible avec une large gamme d'appareils et de systèmes d'exploitation, notre service
-                    répond aux
-                    besoins variés des utilisateurs, qu'ils soient sur un ordinateur de bureau, un ordinateur portable,
-                    un
-                    smartphone ou une tablette.
+                    With an intuitive interface and advanced features, our platform has quickly become the preferred
+                    choice for those looking to download files quickly and reliably. Compatible with a wide range of
+                    devices and operating systems, our service meets the diverse needs of users, whether they are on a
+                    desktop computer, laptop, smartphone, or tablet.
                     <br><br>
-                    Notre engagement envers la satisfaction des utilisateurs se traduit par des mises à jour régulières
-                    visant à améliorer la performance, la sécurité et la fiabilité de notre service. Grâce à des
-                    vitesses de
-                    téléchargement élevées et à une large sélection de torrents de haute qualité, vous pouvez profiter
-                    de vos
-                    fichiers sans interruption ni compromis sur la qualité. De plus, notre plateforme intègre des
-                    mesures de
-                    sécurité robustes pour garantir la protection de vos données et une navigation sereine.
+                    Our commitment to user satisfaction is reflected in regular updates aimed at improving performance,
+                    security, and reliability of our service. With high download speeds and a large selection of
+                    high-quality torrents, you can enjoy your files without interruption or compromise on quality.
+                    Additionally, our platform incorporates robust security measures to ensure the protection of your
+                    data and a smooth browsing experience.
                 </p>
-                <p class="mt-5">Pour en savoir plus sur la sécurité des torrents, consultez notre <a
-                        href="/guide-securite-torrents">Guide de Sécurité des Torrents</a>.</p>
+                <p class="mt-5">To learn more about torrent security, check out our <a
+                        href="/guide-securite-torrents">Torrent Security Guide</a>.</p>
                 <app-question-reponse class="mt-10"></app-question-reponse>
             </div>
         </section>
